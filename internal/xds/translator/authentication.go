@@ -330,7 +330,8 @@ type jwksCluster struct {
 }
 
 // createJwksClusters creates JWKS clusters from the provided routes, if needed.
-func createJwksClusters(tCtx *types.ResourceVersionTable, routes []*ir.HTTPRoute) error {
+func createJwksClusters(tCtx *types.ResourceVersionTable, httpListener *ir.HTTPListener) error {
+	routes := httpListener.Routes
 	if tCtx == nil ||
 		tCtx.XdsResources == nil ||
 		tCtx.XdsResources[resource.ClusterType] == nil ||
@@ -347,7 +348,7 @@ func createJwksClusters(tCtx *types.ResourceVersionTable, routes []*ir.HTTPRoute
 					return err
 				}
 				if existingCluster := findXdsCluster(tCtx, jwks.name); existingCluster == nil {
-					jwksServerCluster := buildXdsCluster(jwks.name, jwks.routeDestinations, false /*isHTTP2 */, true /*isStatic */)
+					jwksServerCluster := buildXdsCluster(jwks.name, httpListener.EnvoyProxy, jwks.routeDestinations, false /*isHTTP2 */, true /*isStatic */)
 					tSocket, err := buildXdsUpstreamTLSSocket()
 					if err != nil {
 						return err

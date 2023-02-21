@@ -9,20 +9,23 @@ import (
 	"time"
 
 	clusterv3 "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
-	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
-	endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
+	corev3 "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
+	tlsv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	httpv3 "github.com/envoyproxy/go-control-plane/envoy/extensions/upstreams/http/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
+	"github.com/envoyproxy/gateway/api/config/v1alpha1"
 	"github.com/envoyproxy/gateway/internal/ir"
 )
 
-func buildXdsCluster(routeName string, destinations []*ir.RouteDestination, isHTTP2 bool, isStatic bool) *clusterv3.Cluster {
-	localities := make([]*endpoint.LocalityLbEndpoints, 0, 1)
-	locality := &endpoint.LocalityLbEndpoints{
-		Locality:    &core.Locality{},
+func buildXdsCluster(routeName string, envoyproxy *v1alpha1.EnvoyProxy, destinations []*ir.RouteDestination, isHTTP2 bool, isStatic bool) *clusterv3.Cluster {
+	localities := make([]*endpointv3.LocalityLbEndpoints, 0, 1)
+	locality := &endpointv3.LocalityLbEndpoints{
+		Locality:    &corev3.Locality{},
 		LbEndpoints: buildXdsEndpoints(destinations),
 		Priority:    0,
 		// Each locality gets the same weight 1. There is a single locality
@@ -30,12 +33,15 @@ func buildXdsCluster(routeName string, destinations []*ir.RouteDestination, isHT
 		// load balancers need the value to be set.
 		LoadBalancingWeight: &wrapperspb.UInt32Value{Value: 1}}
 	localities = append(localities, locality)
+
 	clusterName := routeName
+	clusterConfigSpec := clusterConfig(envoyproxy)
+
 	cluster := &clusterv3.Cluster{
 		Name:            clusterName,
-		ConnectTimeout:  durationpb.New(5 * time.Second),
+		ConnectTimeout:  durationpb.New(time.Duration(clusterConfigSpec.ConnectTimeoutSeconds) * time.Second),
 		LbPolicy:        clusterv3.Cluster_ROUND_ROBIN,
-		LoadAssignment:  &endpoint.ClusterLoadAssignment{ClusterName: clusterName, Endpoints: localities},
+		LoadAssignment:  &endpointv3.ClusterLoadAssignment{ClusterName: clusterName, Endpoints: localities},
 		DnsLookupFamily: clusterv3.Cluster_V4_ONLY,
 		CommonLbConfig: &clusterv3.Cluster_CommonLbConfig{
 			LocalityConfigSpecifier: &clusterv3.Cluster_CommonLbConfig_LocalityWeightedLbConfig_{
@@ -55,21 +61,44 @@ func buildXdsCluster(routeName string, destinations []*ir.RouteDestination, isHT
 		cluster.TypedExtensionProtocolOptions = buildTypedExtensionProtocolOptions()
 	}
 
+	// open upstream tls
+	if clusterConfigSpec.UpstreamTLS {
+		tlsAny, _ := anypb.New(&tlsv3.UpstreamTlsContext{})
+		cluster.TransportSocket = &corev3.TransportSocket{
+			Name: wellknown.TransportSocketTls,
+			ConfigType: &corev3.TransportSocket_TypedConfig{
+				TypedConfig: tlsAny,
+			},
+		}
+	}
+
 	return cluster
 }
 
-func buildXdsEndpoints(destinations []*ir.RouteDestination) []*endpoint.LbEndpoint {
-	endpoints := make([]*endpoint.LbEndpoint, 0, len(destinations))
+func clusterConfig(envoyproxy *v1alpha1.EnvoyProxy) *v1alpha1.EnvoyProxyClusterConfigSpec {
+	if envoyproxy == nil || envoyproxy.Spec.Configurations == nil || envoyproxy.Spec.Configurations.Cluster == nil {
+		return &v1alpha1.EnvoyProxyClusterConfigSpec{
+			// default cluster connection timeout 5 seconds
+			ConnectTimeoutSeconds: 5,
+			UpstreamTLS:           false,
+		}
+	}
+
+	return envoyproxy.Spec.Configurations.Cluster
+}
+
+func buildXdsEndpoints(destinations []*ir.RouteDestination) []*endpointv3.LbEndpoint {
+	endpoints := make([]*endpointv3.LbEndpoint, 0, len(destinations))
 	for _, destination := range destinations {
-		lbEndpoint := &endpoint.LbEndpoint{
-			HostIdentifier: &endpoint.LbEndpoint_Endpoint{
-				Endpoint: &endpoint.Endpoint{
-					Address: &core.Address{
-						Address: &core.Address_SocketAddress{
-							SocketAddress: &core.SocketAddress{
-								Protocol: core.SocketAddress_TCP,
+		lbEndpoint := &endpointv3.LbEndpoint{
+			HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+				Endpoint: &endpointv3.Endpoint{
+					Address: &corev3.Address{
+						Address: &corev3.Address_SocketAddress{
+							SocketAddress: &corev3.SocketAddress{
+								Protocol: corev3.SocketAddress_TCP,
 								Address:  destination.Host,
-								PortSpecifier: &core.SocketAddress_PortValue{
+								PortSpecifier: &corev3.SocketAddress_PortValue{
 									PortValue: destination.Port,
 								},
 							},

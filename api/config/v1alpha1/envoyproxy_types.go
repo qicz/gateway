@@ -37,12 +37,12 @@ type EnvoyProxySpec struct {
 	// +optional
 	Provider *ResourceProvider `json:"provider,omitempty"`
 
-	// Logging defines logging parameters for managed proxies. If unspecified,
-	// default settings apply. This type is not implemented until
-	// https://github.com/envoyproxy/gateway/issues/280 is fixed.
+	// Configurations defines the desired configurations of the Envoy.
+	// If unspecified, default settings for the manged Envoy configurations
+	// are applied.
 	//
-	// +kubebuilder:default={level: {system: info}}
-	Logging ProxyLogging `json:"logging,omitempty"`
+	// +optional
+	Configurations *EnvoyProxyConfigurationSpec `json:"configurations,omitempty"`
 }
 
 // ResourceProvider defines the desired state of a resource provider.
@@ -144,6 +144,28 @@ const (
 type EnvoyProxyStatus struct {
 	// INSERT ADDITIONAL STATUS FIELDS - define observed state of cluster.
 	// Important: Run "make" to regenerate code after modifying this file.
+}
+
+// EnvoyProxyConfigurationSpec defines configuration for the EnvoyProxy.
+type EnvoyProxyConfigurationSpec struct {
+	// Logging defines logging parameters for managed proxies. If unspecified,
+	// default settings apply. This type is not implemented until
+	// https://github.com/envoyproxy/gateway/issues/280 is fixed.
+	//
+	// +kubebuilder:default={level: {system: info}}
+	Logging ProxyLogging `json:"logging,omitempty"`
+	// Cluster defines the "cluster" config.
+	Cluster *EnvoyProxyClusterConfigSpec `json:"cluster,omitempty"`
+}
+
+// EnvoyProxyClusterConfigSpec defines configuration for the EnvoyProxy Cluster.
+type EnvoyProxyClusterConfigSpec struct {
+	// ConnectTimeoutSeconds defines the "cluster" connection timeout seconds.
+	// the global setting for every dynamic cluster.
+	ConnectTimeoutSeconds int32 `json:"connectTimeoutSeconds,omitempty"`
+	// UpstreamTLSUpstreamTLS defines the "cluster" upstream tls settings.
+	// the global setting for every dynamic cluster.
+	UpstreamTLS bool `json:"upstreamTLS,omitempty"`
 }
 
 //+kubebuilder:object:root=true

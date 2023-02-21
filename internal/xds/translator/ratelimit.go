@@ -267,7 +267,7 @@ func (t *Translator) buildRateLimitServiceCluster(irListener *ir.HTTPListener) *
 	clusterName := getRateLimitServiceClusterName()
 	host, port := t.getRateLimitServiceGrpcHostPort()
 	routeDestinations := []*ir.RouteDestination{ir.NewRouteDest(host, uint32(port), 0)}
-	rateLimitServerCluster := buildXdsCluster(clusterName, routeDestinations, true /*isHTTP2 */, false /*isStatic */)
+	rateLimitServerCluster := buildXdsCluster(clusterName, irListener.EnvoyProxy, routeDestinations, true /*isHTTP2 */, false /*isStatic */)
 
 	return rateLimitServerCluster
 }

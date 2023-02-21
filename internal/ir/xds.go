@@ -11,6 +11,7 @@ import (
 
 	"github.com/tetratelabs/multierror"
 
+	"github.com/envoyproxy/gateway/api/config/v1alpha1"
 	egv1a1 "github.com/envoyproxy/gateway/api/v1alpha1"
 	"github.com/envoyproxy/gateway/api/v1alpha1/validation"
 )
@@ -130,6 +131,8 @@ type HTTPListener struct {
 	Routes []*HTTPRoute
 	// IsHTTP2 is set if the upstream client as well as the downstream server are configured to serve HTTP2 traffic.
 	IsHTTP2 bool
+	// EnvoyProxy defines the envoy proxy configurations.
+	EnvoyProxy *v1alpha1.EnvoyProxy
 }
 
 // Validate the fields within the HTTPListener structure
@@ -588,6 +591,8 @@ type TCPListener struct {
 	TLS *TLSInspectorConfig
 	// Destinations associated with TCP traffic to the service.
 	Destinations []*RouteDestination
+	// EnvoyProxy defines the envoy proxy configurations.
+	EnvoyProxy *v1alpha1.EnvoyProxy
 }
 
 // Validate the fields within the TCPListener structure
@@ -645,6 +650,8 @@ type UDPListener struct {
 	Port uint32
 	// Destinations associated with UDP traffic to the service.
 	Destinations []*RouteDestination
+	// EnvoyProxy defines the envoy proxy configurations.
+	EnvoyProxy *v1alpha1.EnvoyProxy
 }
 
 // Validate the fields within the UDPListener structure

@@ -574,6 +574,8 @@ func (t *Translator) processTLSRouteParentRefs(tlsRoute *TLSRouteContext, resour
 					SNIs: hosts,
 				},
 				Destinations: routeDestinations,
+				// envoy config settings
+				EnvoyProxy: resources.EnvoyProxy,
 			}
 			gwXdsIR := xdsIR[irKey]
 			gwXdsIR.TCP = append(gwXdsIR.TCP, irListener)
@@ -700,6 +702,8 @@ func (t *Translator) processUDPRouteParentRefs(udpRoute *UDPRouteContext, resour
 				Address:      "0.0.0.0",
 				Port:         uint32(containerPort),
 				Destinations: routeDestinations,
+				// envoy config settings
+				EnvoyProxy: resources.EnvoyProxy,
 			}
 			gwXdsIR := xdsIR[irKey]
 			gwXdsIR.UDP = append(gwXdsIR.UDP, irListener)
@@ -825,6 +829,8 @@ func (t *Translator) processTCPRouteParentRefs(tcpRoute *TCPRouteContext, resour
 				Address:      "0.0.0.0",
 				Port:         uint32(containerPort),
 				Destinations: routeDestinations,
+				// envoy config settings
+				EnvoyProxy: resources.EnvoyProxy,
 			}
 			gwXdsIR := xdsIR[irKey]
 			gwXdsIR.TCP = append(gwXdsIR.TCP, irListener)

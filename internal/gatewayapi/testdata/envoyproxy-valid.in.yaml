@@ -10,6 +10,9 @@ envoyproxy:
       kubernetes:
         envoyDeployment:
           replicas: 2
+    configurations:
+      cluster:
+        connectTimeoutSeconds: 5
 gateways:
   - apiVersion: gateway.networking.k8s.io/v1beta1
     kind: Gateway

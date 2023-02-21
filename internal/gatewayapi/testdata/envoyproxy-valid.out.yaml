@@ -35,6 +35,21 @@ xdsIR:
         port: 10080
         hostnames:
           - "*"
+        envoyProxy:
+          apiVersion: config.gateway.envoyproxy.io/v1alpha1
+          kind: EnvoyProxy
+          metadata:
+            namespace: envoy-gateway-system
+            name: test
+          spec:
+            provider:
+              type: Kubernetes
+              kubernetes:
+                envoyDeployment:
+                  replicas: 2
+            configurations:
+              cluster:
+                connectTimeoutSeconds: 5
 infraIR:
   envoy-gateway-gateway-1:
     proxy:
@@ -55,6 +70,9 @@ infraIR:
             kubernetes:
               envoyDeployment:
                 replicas: 2
+          configurations:
+            cluster:
+              connectTimeoutSeconds: 5
       image: envoyproxy/envoy:translator-tests
       listeners:
         - address: ""
