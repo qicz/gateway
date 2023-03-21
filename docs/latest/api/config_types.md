@@ -72,10 +72,17 @@ EnvoyProxySpec defines the desired state of EnvoyProxy.
 _Appears in:_
 - [EnvoyProxy](#envoyproxy)
 
-| Field | Description |
-| --- | --- |
-| `provider` _[ResourceProvider](#resourceprovider)_ | Provider defines the desired resource provider and provider-specific configuration. If unspecified, the "Kubernetes" resource provider is used with default configuration parameters. |
-| `logging` _[ProxyLogging](#proxylogging)_ | Logging defines logging parameters for managed proxies. If unspecified, default settings apply. This type is not implemented until https://github.com/envoyproxy/gateway/issues/280 is fixed. |
+| Field                                              | Description                                                                                                                                                                                   |
+|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `provider` _[ResourceProvider](#resourceprovider)_ | Provider defines the desired resource provider and provider-specific configuration. If unspecified, the "Kubernetes" resource provider is used with default configuration parameters.         |
+| `logging` _[ProxyLogging](#proxylogging)_          | Logging defines logging parameters for managed proxies. If unspecified, default settings apply. This type is not implemented until https://github.com/envoyproxy/gateway/issues/280 is fixed. |
+| `bootstrap` _[ProxyBootstrap](#proxybootstrap)_    | Bootstrap defines the Envoy Bootstrap as a YAML string. Visit https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/bootstrap/v3/bootstrap.proto#envoy-v3-api-msg-config-bootstrap-v3-bootstrap to learn more about the syntax. |
+
+> If set, this is the Bootstrap configuration used for the managed Envoy Proxy fleet instead of the default Bootstrap configuration
+set by Envoy Gateway. Some fields within the Bootstrap that are required to communicate with the xDS Server (Envoy Gateway) and receive xDS resources
+from it are not configurable and will result in the `EnvoyProxy` resource being rejected. Backward compatibility across minor versions is not guaranteed.
+We strongly recommend using `egctl x translate` to generate a `EnvoyProxy` resource with the `Bootstrap` field set to the default
+Bootstrap configuration used. You can edit this configuration, and rerun `egctl x translate` to ensure there are no validation errors.
 
 
 
@@ -114,9 +121,25 @@ KubernetesDeploymentSpec defines the desired state of the Kubernetes deployment 
 _Appears in:_
 - [KubernetesResourceProvider](#kubernetesresourceprovider)
 
-| Field | Description |
-| --- | --- |
-| `replicas` _integer_ | Replicas is the number of desired pods. Defaults to 1. |
+| Field                                  | Description                                                                                                                                                                             |
+|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `replicas` _integer_                   | Replicas is the number of desired pods. Defaults to 1.                                                                                                                                  |
+| `podAnnotations` _map[string][string]_ | PodAnnotations are the annotations that should be appended to the pods.                                                                                                                 |
+| `resources` _corev1.ResourceRequirements_ | Compute Resources required by this container. Cannot be updated. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ `corev1 "k8s.io/api/core/v1"`  |
+
+
+## KubernetesServiceSpec
+
+
+
+EnvoyService defines the desired state of the Envoy service resource.
+
+_Appears in:_
+- [KubernetesResourceProvider](#kubernetesresourceprovider)
+
+| Field                                  | Description                                                                                                                                                                             |
+|----------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `annotations` _map[string][string]_ | Annotations that should be appended to the service.By default, no annotations are appended.                                                                                                |
 
 
 ## KubernetesProvider
@@ -142,6 +165,7 @@ _Appears in:_
 | Field | Description |
 | --- | --- |
 | `envoyDeployment` _[KubernetesDeploymentSpec](#kubernetesdeploymentspec)_ | EnvoyDeployment defines the desired state of the Envoy deployment resource. If unspecified, default settings for the manged Envoy deployment resource are applied. |
+| `envoyService` _[KubernetesServiceSpec](#KubernetesServiceSpec)_ | EnvoyService defines the desired state of the Envoy service resource. If unspecified, default settings for the manged Envoy service resource are applied. |
 
 
 ## LogComponent
@@ -206,6 +230,22 @@ _Appears in:_
 | Field | Description |
 | --- | --- |
 | `level` _object (keys:[LogComponent](#logcomponent), values:[LogLevel](#loglevel))_ | Level is a map of logging level per component, where the component is the key and the log level is the value. If unspecified, defaults to "System: Info". |
+
+
+## ProxyBootstrap
+
+Bootstrap defines the Envoy Bootstrap as a YAML string. Visit https://www.envoyproxy.io/docs/envoy/latest/api-v3/config/bootstrap/v3/bootstrap.proto#envoy-v3-api-msg-config-bootstrap-v3-bootstrap to learn more about the syntax.
+If set, this is the Bootstrap configuration used for the managed Envoy Proxy fleet instead of the default Bootstrap configuration set by Envoy Gateway.
+Some fields within the Bootstrap that are required to communicate with the xDS Server (Envoy Gateway) and receive xDS resources
+from it are not configurable and will result in the `EnvoyProxy` resource being rejected.
+Backward compatibility across minor versions is not guaranteed.
+We strongly recommend using `egctl x translate` to generate a `EnvoyProxy` resource with the `Bootstrap` field set to the default
+Bootstrap configuration used. You can edit this configuration, and rerun `egctl x translate` to ensure there are no validation errors.
+
+
+_Appears in:_
+- [EnvoyProxySpec](#envoyproxyspec)
+
 
 
 ## RateLimit
