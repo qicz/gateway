@@ -118,6 +118,15 @@ func checkContainerImage(t *testing.T, container *corev1.Container, image string
 	t.Errorf("container is missing image %q", image)
 }
 
+func checkContainerResources(t *testing.T, container *corev1.Container, expected *corev1.ResourceRequirements) {
+	t.Helper()
+	if apiequality.Semantic.DeepEqual(&container.Resources, expected) {
+		return
+	}
+
+	t.Errorf("container has unexpected %q resources ", expected)
+}
+
 func TestExpectedProxyDeployment(t *testing.T) {
 	svrCfg, err := config.New()
 	require.NoError(t, err)
@@ -153,6 +162,7 @@ func TestExpectedProxyDeployment(t *testing.T) {
 	// Check container details, i.e. env vars, labels, etc. for the deployment are as expected.
 	container := checkContainer(t, deploy, envoyContainerName, true)
 	checkContainerImage(t, container, ir.DefaultProxyImage)
+	checkContainerResources(t, container, egcfgv1a1.DefaultResourceRequirements())
 	checkEnvVar(t, deploy, envoyContainerName, envoyNsEnvVar)
 	checkEnvVar(t, deploy, envoyContainerName, envoyPodEnvVar)
 	checkLabels(t, deploy, deploy.Labels)
