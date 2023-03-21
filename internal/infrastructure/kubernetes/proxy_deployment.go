@@ -27,10 +27,6 @@ const (
 	envoyNsEnvVar = "ENVOY_GATEWAY_NAMESPACE"
 	// envoyPodEnvVar is the name of the Envoy pod name environment variable.
 	envoyPodEnvVar = "ENVOY_POD_NAME"
-	// envoyHTTPPort is the container port number of Envoy's HTTP endpoint.
-	envoyHTTPPort = int32(8080)
-	// envoyHTTPSPort is the container port number of Envoy's HTTPS endpoint.
-	envoyHTTPSPort = int32(8443)
 )
 
 // expectedProxyDeployment returns the expected Deployment based on the provided infra.

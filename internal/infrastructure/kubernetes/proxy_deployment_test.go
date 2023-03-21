@@ -27,6 +27,13 @@ import (
 	"github.com/envoyproxy/gateway/internal/xds/bootstrap"
 )
 
+const (
+	// envoyHTTPPort is the container port number of Envoy's HTTP endpoint.
+	envoyHTTPPort = int32(8080)
+	// envoyHTTPSPort is the container port number of Envoy's HTTPS endpoint.
+	envoyHTTPSPort = int32(8443)
+)
+
 func checkEnvVar(t *testing.T, deploy *appsv1.Deployment, container, name string) {
 	t.Helper()
 
