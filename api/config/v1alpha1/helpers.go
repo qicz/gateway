@@ -14,7 +14,7 @@ import (
 // DefaultEnvoyGateway returns a new EnvoyGateway with default configuration parameters.
 func DefaultEnvoyGateway() *EnvoyGateway {
 	gw := DefaultGateway()
-	p := DefaultProvider()
+	p := DefaultGatewayProvider()
 	return &EnvoyGateway{
 		metav1.TypeMeta{
 			Kind:       KindEnvoyGateway,
@@ -27,8 +27,8 @@ func DefaultEnvoyGateway() *EnvoyGateway {
 	}
 }
 
-// SetDefaults sets default EnvoyGateway configuration parameters.
-func (e *EnvoyGateway) SetDefaults() {
+// SetEnvoyGatewayDefaults sets default EnvoyGateway configuration parameters.
+func (e *EnvoyGateway) SetEnvoyGatewayDefaults() {
 	if e.TypeMeta.Kind == "" {
 		e.TypeMeta.Kind = KindEnvoyGateway
 	}
@@ -36,7 +36,7 @@ func (e *EnvoyGateway) SetDefaults() {
 		e.TypeMeta.APIVersion = GroupVersion.String()
 	}
 	if e.Provider == nil {
-		e.Provider = DefaultProvider()
+		e.Provider = DefaultGatewayProvider()
 	}
 	if e.Gateway == nil {
 		e.Gateway = DefaultGateway()
@@ -50,44 +50,51 @@ func DefaultGateway() *Gateway {
 	}
 }
 
-// DefaultProvider returns a new Provider with default configuration parameters.
-func DefaultProvider() *Provider {
-	return &Provider{
+// DefaultGatewayProvider returns a new GatewayProvider with default configuration parameters.
+func DefaultGatewayProvider() *GatewayProvider {
+	return &GatewayProvider{
 		Type: ProviderTypeKubernetes,
 	}
 }
 
-// GetProvider returns the Provider of EnvoyGateway or a default Provider if unspecified.
-func (e *EnvoyGateway) GetProvider() *Provider {
+// GetGatewayProvider returns the GatewayProvider of EnvoyGateway or a default GatewayProvider if unspecified.
+func (e *EnvoyGateway) GetGatewayProvider() *GatewayProvider {
 	if e.Provider != nil {
 		return e.Provider
 	}
-	e.Provider = DefaultProvider()
+	e.Provider = DefaultGatewayProvider()
 
 	return e.Provider
 }
 
-// DefaultResourceProvider returns a new ResourceProvider with default settings.
-func DefaultResourceProvider() *ResourceProvider {
-	return &ResourceProvider{
+// DefaultGatewayKubeProvider returns a new GatewayKubernetesProvider with default settings.
+func DefaultGatewayKubeProvider() *GatewayKubernetesProvider {
+	return &GatewayKubernetesProvider{
+		RateLimitDeployment: DefaultKubernetesDeployment(),
+	}
+}
+
+// DefaultEnvoyProxyProvider returns a new EnvoyProxyProvider with default settings.
+func DefaultEnvoyProxyProvider() *EnvoyProxyProvider {
+	return &EnvoyProxyProvider{
 		Type: ProviderTypeKubernetes,
 	}
 }
 
-// GetProvider returns the ResourceProvider of EnvoyProxy or a default ResourceProvider
+// GetEnvoyProxyProvider returns the EnvoyProxyProvider of EnvoyProxy or a default EnvoyProxyProvider
 // if unspecified.
-func (e *EnvoyProxy) GetProvider() *ResourceProvider {
+func (e *EnvoyProxy) GetEnvoyProxyProvider() *EnvoyProxyProvider {
 	if e.Spec.Provider != nil {
 		return e.Spec.Provider
 	}
-	e.Spec.Provider = DefaultResourceProvider()
+	e.Spec.Provider = DefaultEnvoyProxyProvider()
 
 	return e.Spec.Provider
 }
 
-// DefaultKubeResourceProvider returns a new KubernetesResourceProvider with default settings.
-func DefaultKubeResourceProvider() *KubernetesResourceProvider {
-	return &KubernetesResourceProvider{
+// DefaultEnvoyProxyKubeProvider returns a new EnvoyProxyKubernetesProvider with default settings.
+func DefaultEnvoyProxyKubeProvider() *EnvoyProxyKubernetesProvider {
+	return &EnvoyProxyKubernetesProvider{
 		EnvoyDeployment: DefaultKubernetesDeployment(),
 		EnvoyService:    DefaultKubernetesService(),
 	}
@@ -147,16 +154,16 @@ func GetKubernetesServiceType(serviceType ServiceType) *ServiceType {
 	return &serviceType
 }
 
-// GetKubeResourceProvider returns the KubernetesResourceProvider of ResourceProvider or
-// a default KubernetesResourceProvider if unspecified. If ResourceProvider is not of
-// type "Kubernetes", a nil KubernetesResourceProvider is returned.
-func (r *ResourceProvider) GetKubeResourceProvider() *KubernetesResourceProvider {
+// GetEnvoyProxyKubeProvider returns the EnvoyProxyKubernetesProvider of EnvoyProxyProvider or
+// a default EnvoyProxyKubernetesProvider if unspecified. If EnvoyProxyProvider is not of
+// type "Kubernetes", a nil EnvoyProxyKubernetesProvider is returned.
+func (r *EnvoyProxyProvider) GetEnvoyProxyKubeProvider() *EnvoyProxyKubernetesProvider {
 	if r.Type != ProviderTypeKubernetes {
 		return nil
 	}
 
 	if r.Kubernetes == nil {
-		r.Kubernetes = DefaultKubeResourceProvider()
+		r.Kubernetes = DefaultEnvoyProxyKubeProvider()
 		return r.Kubernetes
 	}
 
@@ -176,12 +183,52 @@ func (r *ResourceProvider) GetKubeResourceProvider() *KubernetesResourceProvider
 		r.Kubernetes.EnvoyDeployment.Container = DefaultKubernetesContainer()
 	}
 
+	if r.Kubernetes.EnvoyDeployment.Container.Resources == nil {
+		r.Kubernetes.EnvoyDeployment.Container.Resources = DefaultResourceRequirements()
+	}
+
 	if r.Kubernetes.EnvoyService == nil {
 		r.Kubernetes.EnvoyService = DefaultKubernetesService()
 	}
 
 	if r.Kubernetes.EnvoyService.Type == nil {
 		r.Kubernetes.EnvoyService.Type = GetKubernetesServiceType(ServiceTypeLoadBalancer)
+	}
+
+	return r.Kubernetes
+}
+
+// GetGatewayKubeProvider returns the GatewayKubernetesProvider of GatewayProvider or
+// a default GatewayKubernetesProvider if unspecified. If GatewayProvider is not of
+// type "Kubernetes", a nil GatewayKubernetesProvider is returned.
+func (r *GatewayProvider) GetGatewayKubeProvider() *GatewayKubernetesProvider {
+	if r.Type != ProviderTypeKubernetes {
+		return nil
+	}
+
+	if r.Kubernetes == nil {
+		r.Kubernetes = DefaultGatewayKubeProvider()
+		return r.Kubernetes
+	}
+
+	if r.Kubernetes.RateLimitDeployment == nil {
+		r.Kubernetes.RateLimitDeployment = DefaultKubernetesDeployment()
+	}
+
+	if r.Kubernetes.RateLimitDeployment.Replicas == nil {
+		r.Kubernetes.RateLimitDeployment.Replicas = DefaultKubernetesDeploymentReplicas()
+	}
+
+	if r.Kubernetes.RateLimitDeployment.Pod == nil {
+		r.Kubernetes.RateLimitDeployment.Pod = DefaultKubernetesPod()
+	}
+
+	if r.Kubernetes.RateLimitDeployment.Container == nil {
+		r.Kubernetes.RateLimitDeployment.Container = DefaultKubernetesContainer()
+	}
+
+	if r.Kubernetes.RateLimitDeployment.Container.Resources == nil {
+		r.Kubernetes.RateLimitDeployment.Container.Resources = DefaultResourceRequirements()
 	}
 
 	return r.Kubernetes

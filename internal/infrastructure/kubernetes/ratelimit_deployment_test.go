@@ -12,23 +12,23 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	fakeclient "sigs.k8s.io/controller-runtime/pkg/client/fake"
 
+	egcfgv1a1 "github.com/envoyproxy/gateway/api/config/v1alpha1"
 	"github.com/envoyproxy/gateway/internal/envoygateway"
 	"github.com/envoyproxy/gateway/internal/envoygateway/config"
 	"github.com/envoyproxy/gateway/internal/ir"
 )
 
-func TestExpectedRateLimitDeployment(t *testing.T) {
+func testExpectedRateLimitDeployment(t *testing.T, rateLimitInfra *ir.RateLimitInfra, expected *corev1.ResourceRequirements) {
 	svrCfg, err := config.New()
 	require.NoError(t, err)
 	cli := fakeclient.NewClientBuilder().WithScheme(envoygateway.GetScheme()).WithObjects().Build()
 	kube := NewInfra(cli, svrCfg)
-
-	rateLimitInfra := new(ir.RateLimitInfra)
-	rateLimitInfra.Backend = &ir.RateLimitDBBackend{Redis: &ir.RateLimitRedis{URL: ""}}
 
 	deployment := kube.expectedRateLimitDeployment(rateLimitInfra)
 
@@ -38,6 +38,7 @@ func TestExpectedRateLimitDeployment(t *testing.T) {
 	// Check container details, i.e. env vars, labels, etc. for the deployment are as expected.
 	container := checkContainer(t, deployment, rateLimitInfraName, true)
 	checkContainerImage(t, container, rateLimitInfraImage)
+	checkContainerResources(t, container, expected)
 	checkEnvVar(t, deployment, rateLimitInfraName, rateLimitRedisSocketTypeEnvVar)
 	checkEnvVar(t, deployment, rateLimitInfraName, rateLimitRedisURLEnvVar)
 	checkEnvVar(t, deployment, rateLimitInfraName, rateLimitRuntimeRootEnvVar)
@@ -58,6 +59,56 @@ func TestExpectedRateLimitDeployment(t *testing.T) {
 	repl := int32(1)
 	// Check the number of replicas is as expected.
 	assert.Equal(t, repl, *deployment.Spec.Replicas)
+
+	// Make sure no pod annotations are set by default
+	checkPodAnnotations(t, deployment, nil)
+}
+
+func TestExpectedRateLimitDeployment(t *testing.T) {
+	rateLimitInfra := &ir.RateLimitInfra{
+		Config: &egcfgv1a1.EnvoyGateway{
+			TypeMeta: metav1.TypeMeta{},
+			EnvoyGatewaySpec: egcfgv1a1.EnvoyGatewaySpec{
+				RateLimit: &egcfgv1a1.RateLimit{
+					Backend: egcfgv1a1.RateLimitDatabaseBackend{
+						Type:  egcfgv1a1.RedisBackendType,
+						Redis: &egcfgv1a1.RateLimitRedisSettings{URL: ""},
+					},
+				},
+			},
+		},
+	}
+	testExpectedRateLimitDeployment(t, rateLimitInfra, egcfgv1a1.DefaultResourceRequirements())
+}
+
+func TestExpectedRatelimitDeploymentForSpecifiedResources(t *testing.T) {
+	requirements := corev1.ResourceRequirements{
+		Limits: nil,
+		Requests: corev1.ResourceList{
+			corev1.ResourceCPU:    resource.MustParse("10m"),
+			corev1.ResourceMemory: resource.MustParse("128Mi")},
+		Claims: nil,
+	}
+	rateLimitInfra := &ir.RateLimitInfra{
+		Config: &egcfgv1a1.EnvoyGateway{
+			TypeMeta: metav1.TypeMeta{},
+			EnvoyGatewaySpec: egcfgv1a1.EnvoyGatewaySpec{
+				Provider: &egcfgv1a1.GatewayProvider{
+					Type: egcfgv1a1.ProviderTypeKubernetes,
+					Kubernetes: &egcfgv1a1.GatewayKubernetesProvider{RateLimitDeployment: &egcfgv1a1.KubernetesDeploymentSpec{
+						Container: &egcfgv1a1.KubernetesContainerSpec{Resources: &requirements}},
+					},
+				},
+				RateLimit: &egcfgv1a1.RateLimit{
+					Backend: egcfgv1a1.RateLimitDatabaseBackend{
+						Type:  egcfgv1a1.RedisBackendType,
+						Redis: &egcfgv1a1.RateLimitRedisSettings{URL: ""},
+					},
+				},
+			},
+		},
+	}
+	testExpectedRateLimitDeployment(t, rateLimitInfra, &requirements)
 }
 
 func TestCreateOrUpdateRateLimitDeployment(t *testing.T) {
@@ -65,9 +116,22 @@ func TestCreateOrUpdateRateLimitDeployment(t *testing.T) {
 	require.NoError(t, err)
 
 	kube := NewInfra(nil, cfg)
-	rateLimitInfra := new(ir.RateLimitInfra)
-	rateLimitInfra.Backend = &ir.RateLimitDBBackend{Redis: &ir.RateLimitRedis{URL: ""}}
-
+	rateLimitInfra := &ir.RateLimitInfra{
+		Config: &egcfgv1a1.EnvoyGateway{
+			TypeMeta: metav1.TypeMeta{},
+			EnvoyGatewaySpec: egcfgv1a1.EnvoyGatewaySpec{
+				Provider: &egcfgv1a1.GatewayProvider{
+					Type: egcfgv1a1.ProviderTypeKubernetes,
+				},
+				RateLimit: &egcfgv1a1.RateLimit{
+					Backend: egcfgv1a1.RateLimitDatabaseBackend{
+						Type:  egcfgv1a1.RedisBackendType,
+						Redis: &egcfgv1a1.RateLimitRedisSettings{URL: ""},
+					},
+				},
+			},
+		},
+	}
 	deployment := kube.expectedRateLimitDeployment(rateLimitInfra)
 
 	testCases := []struct {
@@ -89,7 +153,7 @@ func TestCreateOrUpdateRateLimitDeployment(t *testing.T) {
 		},
 		{
 			name:    "update ratelimit deployment image",
-			in:      &ir.RateLimitInfra{Backend: &ir.RateLimitDBBackend{Redis: &ir.RateLimitRedis{URL: ""}}},
+			in:      &ir.RateLimitInfra{Config: rateLimitInfra.Config},
 			current: deployment,
 			want:    deploymentWithImage(deployment, rateLimitInfraImage),
 		},
@@ -136,9 +200,22 @@ func TestDeleteRateLimitDeployment(t *testing.T) {
 				Client:    fakeclient.NewClientBuilder().WithScheme(envoygateway.GetScheme()).Build(),
 				Namespace: "test",
 			}
-			rateLimitInfra := new(ir.RateLimitInfra)
-			rateLimitInfra.Backend = &ir.RateLimitDBBackend{Redis: &ir.RateLimitRedis{URL: ""}}
-
+			rateLimitInfra := &ir.RateLimitInfra{
+				Config: &egcfgv1a1.EnvoyGateway{
+					TypeMeta: metav1.TypeMeta{},
+					EnvoyGatewaySpec: egcfgv1a1.EnvoyGatewaySpec{
+						Provider: &egcfgv1a1.GatewayProvider{
+							Type: egcfgv1a1.ProviderTypeKubernetes,
+						},
+						RateLimit: &egcfgv1a1.RateLimit{
+							Backend: egcfgv1a1.RateLimitDatabaseBackend{
+								Type:  egcfgv1a1.RedisBackendType,
+								Redis: &egcfgv1a1.RateLimitRedisSettings{URL: ""},
+							},
+						},
+					},
+				},
+			}
 			err := kube.createOrUpdateRateLimitDeployment(context.Background(), rateLimitInfra)
 			require.NoError(t, err)
 

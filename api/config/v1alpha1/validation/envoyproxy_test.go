@@ -61,7 +61,7 @@ func TestValidateEnvoyProxy(t *testing.T) {
 					Name:      "test",
 				},
 				Spec: egcfgv1a1.EnvoyProxySpec{
-					Provider: &egcfgv1a1.ResourceProvider{
+					Provider: &egcfgv1a1.EnvoyProxyProvider{
 						Type: egcfgv1a1.ProviderTypeFile,
 					},
 				},
@@ -76,9 +76,9 @@ func TestValidateEnvoyProxy(t *testing.T) {
 					Name:      "test",
 				},
 				Spec: egcfgv1a1.EnvoyProxySpec{
-					Provider: &egcfgv1a1.ResourceProvider{
+					Provider: &egcfgv1a1.EnvoyProxyProvider{
 						Type: egcfgv1a1.ProviderTypeKubernetes,
-						Kubernetes: &egcfgv1a1.KubernetesResourceProvider{
+						Kubernetes: &egcfgv1a1.EnvoyProxyKubernetesProvider{
 							EnvoyService: nil,
 						},
 					},
@@ -94,9 +94,9 @@ func TestValidateEnvoyProxy(t *testing.T) {
 					Name:      "test",
 				},
 				Spec: egcfgv1a1.EnvoyProxySpec{
-					Provider: &egcfgv1a1.ResourceProvider{
+					Provider: &egcfgv1a1.EnvoyProxyProvider{
 						Type: egcfgv1a1.ProviderTypeKubernetes,
-						Kubernetes: &egcfgv1a1.KubernetesResourceProvider{
+						Kubernetes: &egcfgv1a1.EnvoyProxyKubernetesProvider{
 							EnvoyService: &egcfgv1a1.KubernetesServiceSpec{
 								Type: egcfgv1a1.GetKubernetesServiceType(""),
 							},
@@ -114,9 +114,9 @@ func TestValidateEnvoyProxy(t *testing.T) {
 					Name:      "test",
 				},
 				Spec: egcfgv1a1.EnvoyProxySpec{
-					Provider: &egcfgv1a1.ResourceProvider{
+					Provider: &egcfgv1a1.EnvoyProxyProvider{
 						Type: egcfgv1a1.ProviderTypeKubernetes,
-						Kubernetes: &egcfgv1a1.KubernetesResourceProvider{
+						Kubernetes: &egcfgv1a1.EnvoyProxyKubernetesProvider{
 							EnvoyService: &egcfgv1a1.KubernetesServiceSpec{
 								Type: egcfgv1a1.GetKubernetesServiceType(egcfgv1a1.ServiceType(corev1.ServiceTypeNodePort)),
 							},
@@ -134,9 +134,9 @@ func TestValidateEnvoyProxy(t *testing.T) {
 					Name:      "test",
 				},
 				Spec: egcfgv1a1.EnvoyProxySpec{
-					Provider: &egcfgv1a1.ResourceProvider{
+					Provider: &egcfgv1a1.EnvoyProxyProvider{
 						Type: egcfgv1a1.ProviderTypeKubernetes,
-						Kubernetes: &egcfgv1a1.KubernetesResourceProvider{
+						Kubernetes: &egcfgv1a1.EnvoyProxyKubernetesProvider{
 							EnvoyService: &egcfgv1a1.KubernetesServiceSpec{
 								Type: egcfgv1a1.GetKubernetesServiceType(egcfgv1a1.ServiceTypeLoadBalancer),
 							},
@@ -154,9 +154,9 @@ func TestValidateEnvoyProxy(t *testing.T) {
 					Name:      "test",
 				},
 				Spec: egcfgv1a1.EnvoyProxySpec{
-					Provider: &egcfgv1a1.ResourceProvider{
+					Provider: &egcfgv1a1.EnvoyProxyProvider{
 						Type: egcfgv1a1.ProviderTypeKubernetes,
-						Kubernetes: &egcfgv1a1.KubernetesResourceProvider{
+						Kubernetes: &egcfgv1a1.EnvoyProxyKubernetesProvider{
 							EnvoyService: &egcfgv1a1.KubernetesServiceSpec{
 								Type: egcfgv1a1.GetKubernetesServiceType(egcfgv1a1.ServiceTypeClusterIP),
 							},

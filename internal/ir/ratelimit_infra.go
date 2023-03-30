@@ -5,13 +5,17 @@
 
 package ir
 
+import (
+	"github.com/envoyproxy/gateway/api/config/v1alpha1"
+)
+
 // RateLimitInfra defines managed rate limit service infrastructure.
 // +k8s:deepcopy-gen=true
 type RateLimitInfra struct {
-	// Rate limit service configuration
-	Configs []*RateLimitServiceConfig
-	// Backend holds configuration associated with the backend database.
-	Backend *RateLimitDBBackend
+	// ServiceConfigs for Rate limit service configuration.
+	ServiceConfigs []*RateLimitServiceConfig
+	// Config ratelimit configuration.
+	Config *v1alpha1.EnvoyGateway
 }
 
 // RateLimitServiceConfig holds the rate limit service configurations
@@ -24,17 +28,11 @@ type RateLimitServiceConfig struct {
 	Config string
 }
 
-// RateLimitDBBackend defines the database backend properties
-// associated with the rate limit service.
-// +k8s:deepcopy-gen=true
-type RateLimitDBBackend struct {
-	// Redis backend details.
-	Redis *RateLimitRedis
-}
+// GetRateLimitConfig returns the RateLimitInfra config.
+func (p *RateLimitInfra) GetRateLimitConfig() *v1alpha1.EnvoyGateway {
+	if p.Config == nil {
+		p.Config = new(v1alpha1.EnvoyGateway)
+	}
 
-// RateLimitRedis defines the redis database configuration.
-// +k8s:deepcopy-gen=true
-type RateLimitRedis struct {
-	// URL of the Redis Database.
-	URL string
+	return p.Config
 }
