@@ -141,7 +141,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(gwapiv1.GatewaySpec),
 			}
-			resources.Gateways = append(resources.Gateways, gateway)
+			resources.Append(gateway)
 		case KindTCPRoute:
 			typedSpec := spec.Interface()
 			tcpRoute := &gwapiv1a2.TCPRoute{
@@ -154,7 +154,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(gwapiv1a2.TCPRouteSpec),
 			}
-			resources.TCPRoutes = append(resources.TCPRoutes, tcpRoute)
+			resources.Append(tcpRoute)
 		case KindUDPRoute:
 			typedSpec := spec.Interface()
 			udpRoute := &gwapiv1a2.UDPRoute{
@@ -167,7 +167,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(gwapiv1a2.UDPRouteSpec),
 			}
-			resources.UDPRoutes = append(resources.UDPRoutes, udpRoute)
+			resources.Append(udpRoute)
 		case KindTLSRoute:
 			typedSpec := spec.Interface()
 			tlsRoute := &gwapiv1a2.TLSRoute{
@@ -180,7 +180,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(gwapiv1a2.TLSRouteSpec),
 			}
-			resources.TLSRoutes = append(resources.TLSRoutes, tlsRoute)
+			resources.Append(tlsRoute)
 		case KindHTTPRoute:
 			typedSpec := spec.Interface()
 			httpRoute := &gwapiv1.HTTPRoute{
@@ -193,7 +193,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(gwapiv1.HTTPRouteSpec),
 			}
-			resources.HTTPRoutes = append(resources.HTTPRoutes, httpRoute)
+			resources.Append(httpRoute)
 		case KindGRPCRoute:
 			typedSpec := spec.Interface()
 			grpcRoute := &gwapiv1.GRPCRoute{
@@ -206,14 +206,14 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(gwapiv1.GRPCRouteSpec),
 			}
-			resources.GRPCRoutes = append(resources.GRPCRoutes, grpcRoute)
+			resources.Append(grpcRoute)
 		case KindNamespace:
 			namespace := &corev1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: name,
 				},
 			}
-			resources.Namespaces = append(resources.Namespaces, namespace)
+			resources.Append(namespace)
 			providedNamespaceMap.Insert(name)
 		case KindService:
 			typedSpec := spec.Interface()
@@ -228,7 +228,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				// fill with dummy IP when service clusterIP is empty
 				service.Spec.ClusterIP = dummyClusterIP
 			}
-			resources.Services = append(resources.Services, service)
+			resources.Append(service)
 		case KindEnvoyPatchPolicy:
 			typedSpec := spec.Interface()
 			envoyPatchPolicy := &egv1a1.EnvoyPatchPolicy{
@@ -241,7 +241,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(egv1a1.EnvoyPatchPolicySpec),
 			}
-			resources.EnvoyPatchPolicies = append(resources.EnvoyPatchPolicies, envoyPatchPolicy)
+			resources.Append(envoyPatchPolicy)
 		case KindClientTrafficPolicy:
 			typedSpec := spec.Interface()
 			clientTrafficPolicy := &egv1a1.ClientTrafficPolicy{
@@ -254,7 +254,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(egv1a1.ClientTrafficPolicySpec),
 			}
-			resources.ClientTrafficPolicies = append(resources.ClientTrafficPolicies, clientTrafficPolicy)
+			resources.Append(clientTrafficPolicy)
 		case KindBackendTrafficPolicy:
 			typedSpec := spec.Interface()
 			backendTrafficPolicy := &egv1a1.BackendTrafficPolicy{
@@ -267,7 +267,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(egv1a1.BackendTrafficPolicySpec),
 			}
-			resources.BackendTrafficPolicies = append(resources.BackendTrafficPolicies, backendTrafficPolicy)
+			resources.Append(backendTrafficPolicy)
 		case KindSecurityPolicy:
 			typedSpec := spec.Interface()
 			securityPolicy := &egv1a1.SecurityPolicy{
@@ -280,7 +280,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(egv1a1.SecurityPolicySpec),
 			}
-			resources.SecurityPolicies = append(resources.SecurityPolicies, securityPolicy)
+			resources.Append(securityPolicy)
 		case KindHTTPRouteFilter:
 			typedSpec := spec.Interface()
 			httpRouteFilter := &egv1a1.HTTPRouteFilter{
@@ -294,7 +294,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 				},
 				Spec: typedSpec.(egv1a1.HTTPRouteFilterSpec),
 			}
-			resources.HTTPRouteFilters = append(resources.HTTPRouteFilters, httpRouteFilter)
+			resources.Append(httpRouteFilter)
 		}
 
 		return nil
@@ -309,7 +309,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 					Name: config.DefaultNamespace,
 				},
 			}
-			resources.Namespaces = append(resources.Namespaces, namespace)
+			resources.Append(namespace)
 			providedNamespaceMap.Insert(config.DefaultNamespace)
 		}
 	}
@@ -322,7 +322,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 						Name: ns,
 					},
 				}
-				resources.Namespaces = append(resources.Namespaces, namespace)
+				resources.Append(namespace)
 			}
 		}
 
@@ -350,7 +350,7 @@ func loadKubernetesYAMLToResources(input []byte, addMissingResources bool) (*Res
 
 		for key, service := range requiredServiceMap {
 			if provided, found := providedServiceMap[key]; !found {
-				resources.Services = append(resources.Services, service)
+				resources.Append(service)
 			} else {
 				providedPorts := sets.NewString()
 				for _, port := range provided.Spec.Ports {

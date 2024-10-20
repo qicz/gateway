@@ -119,33 +119,45 @@ func newTranslateResult(gateways []*GatewayContext,
 		InfraIR: infraIR,
 	}
 
+	translateResult.InitCache()
+
 	for _, gateway := range gateways {
-		translateResult.Gateways = append(translateResult.Gateways, gateway.Gateway)
+		translateResult.Append(gateway.Gateway)
 	}
 	for _, httpRoute := range httpRoutes {
-		translateResult.HTTPRoutes = append(translateResult.HTTPRoutes, httpRoute.HTTPRoute)
+		translateResult.Append(httpRoute.HTTPRoute)
 	}
 	for _, grpcRoute := range grpcRoutes {
-		translateResult.GRPCRoutes = append(translateResult.GRPCRoutes, grpcRoute.GRPCRoute)
+		translateResult.Append(grpcRoute.GRPCRoute)
 	}
 	for _, tlsRoute := range tlsRoutes {
-		translateResult.TLSRoutes = append(translateResult.TLSRoutes, tlsRoute.TLSRoute)
+		translateResult.Append(tlsRoute.TLSRoute)
 	}
 	for _, tcpRoute := range tcpRoutes {
-		translateResult.TCPRoutes = append(translateResult.TCPRoutes, tcpRoute.TCPRoute)
+		translateResult.Append(tcpRoute.TCPRoute)
 	}
 	for _, udpRoute := range udpRoutes {
-		translateResult.UDPRoutes = append(translateResult.UDPRoutes, udpRoute.UDPRoute)
+		translateResult.Append(udpRoute.UDPRoute)
 	}
-
-	translateResult.ClientTrafficPolicies = append(translateResult.ClientTrafficPolicies, clientTrafficPolicies...)
-	translateResult.BackendTrafficPolicies = append(translateResult.BackendTrafficPolicies, backendTrafficPolicies...)
-	translateResult.SecurityPolicies = append(translateResult.SecurityPolicies, securityPolicies...)
-	translateResult.BackendTLSPolicies = append(translateResult.BackendTLSPolicies, backendTLSPolicies...)
-	translateResult.EnvoyExtensionPolicies = append(translateResult.EnvoyExtensionPolicies, envoyExtensionPolicies...)
+	for _, policy := range clientTrafficPolicies {
+		translateResult.Append(policy)
+	}
+	for _, policy := range backendTrafficPolicies {
+		translateResult.Append(policy)
+	}
+	for _, policy := range securityPolicies {
+		translateResult.Append(policy)
+	}
+	for _, policy := range backendTLSPolicies {
+		translateResult.Append(policy)
+	}
+	for _, policy := range envoyExtensionPolicies {
+		translateResult.Append(policy)
+	}
+	for _, backend := range backends {
+		translateResult.Append(backend)
+	}
 	translateResult.ExtensionServerPolicies = append(translateResult.ExtensionServerPolicies, extPolicies...)
-
-	translateResult.Backends = append(translateResult.Backends, backends...)
 	return translateResult
 }
 

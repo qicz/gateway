@@ -71,6 +71,7 @@ func TestTranslate(t *testing.T) {
 
 			resources := &resource.Resources{}
 			mustUnmarshal(t, input, resources)
+			resources.InitCache()
 			envoyPatchPolicyEnabled := true
 			backendEnabled := true
 
@@ -96,7 +97,7 @@ func TestTranslate(t *testing.T) {
 			for i := 1; i <= 4; i++ {
 				svcName := "service-" + strconv.Itoa(i)
 				epSliceName := "endpointslice-" + strconv.Itoa(i)
-				resources.Services = append(resources.Services,
+				resources.Append(
 					&corev1.Service{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: "default",
@@ -133,7 +134,7 @@ func TestTranslate(t *testing.T) {
 						},
 					},
 				)
-				resources.EndpointSlices = append(resources.EndpointSlices,
+				resources.Append(
 					&discoveryv1.EndpointSlice{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      epSliceName,
@@ -179,7 +180,7 @@ func TestTranslate(t *testing.T) {
 				)
 			}
 
-			resources.Services = append(resources.Services,
+			resources.Append(
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "default",
@@ -198,7 +199,7 @@ func TestTranslate(t *testing.T) {
 					},
 				},
 			)
-			resources.EndpointSlices = append(resources.EndpointSlices,
+			resources.Append(
 				&discoveryv1.EndpointSlice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "mirror-service-endpointslice",
@@ -229,7 +230,7 @@ func TestTranslate(t *testing.T) {
 			)
 
 			// add otel-collector service
-			resources.Services = append(resources.Services,
+			resources.Append(
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "monitoring",
@@ -255,7 +256,7 @@ func TestTranslate(t *testing.T) {
 					},
 				},
 			)
-			resources.EndpointSlices = append(resources.EndpointSlices,
+			resources.Append(
 				&discoveryv1.EndpointSlice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "otel-collector-endpointslice",
@@ -290,15 +291,20 @@ func TestTranslate(t *testing.T) {
 				},
 			)
 
-			resources.Namespaces = append(resources.Namespaces, &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "envoy-gateway",
+			namespaces := []*corev1.Namespace{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "envoy-gateway",
+					},
+				}, {
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "default",
+					},
 				},
-			}, &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "default",
-				},
-			})
+			}
+			for _, namespace := range namespaces {
+				resources.Append(namespace)
+			}
 
 			got, _ := translator.Translate(resources)
 			require.NoError(t, field.SetValue(got, "LastTransitionTime", metav1.NewTime(time.Time{})))
@@ -318,9 +324,9 @@ func TestTranslate(t *testing.T) {
 
 			opts := []cmp.Option{
 				cmpopts.IgnoreFields(metav1.Condition{}, "LastTransitionTime"),
+				cmpopts.IgnoreFields(resource.Resources{}, "Cache"),
 				cmpopts.EquateEmpty(),
 			}
-
 			require.Empty(t, cmp.Diff(want, got, opts...))
 		})
 	}
@@ -337,6 +343,7 @@ func TestTranslateWithExtensionKinds(t *testing.T) {
 
 			resources := &resource.Resources{}
 			mustUnmarshal(t, input, resources)
+			resources.InitCache()
 
 			translator := &Translator{
 				GatewayControllerName:  egv1a1.GatewayControllerName,
@@ -353,7 +360,7 @@ func TestTranslateWithExtensionKinds(t *testing.T) {
 			for i := 1; i <= 3; i++ {
 				svcName := "service-" + strconv.Itoa(i)
 				epSliceName := "endpointslice-" + strconv.Itoa(i)
-				resources.Services = append(resources.Services,
+				resources.Append(
 					&corev1.Service{
 						ObjectMeta: metav1.ObjectMeta{
 							Namespace: "default",
@@ -390,7 +397,7 @@ func TestTranslateWithExtensionKinds(t *testing.T) {
 						},
 					},
 				)
-				resources.EndpointSlices = append(resources.EndpointSlices,
+				resources.Append(
 					&discoveryv1.EndpointSlice{
 						ObjectMeta: metav1.ObjectMeta{
 							Name:      epSliceName,
@@ -436,7 +443,7 @@ func TestTranslateWithExtensionKinds(t *testing.T) {
 				)
 			}
 
-			resources.Services = append(resources.Services,
+			resources.Append(
 				&corev1.Service{
 					ObjectMeta: metav1.ObjectMeta{
 						Namespace: "default",
@@ -454,7 +461,7 @@ func TestTranslateWithExtensionKinds(t *testing.T) {
 					},
 				},
 			)
-			resources.EndpointSlices = append(resources.EndpointSlices,
+			resources.Append(
 				&discoveryv1.EndpointSlice{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      "mirror-service-endpointslice",
@@ -484,15 +491,20 @@ func TestTranslateWithExtensionKinds(t *testing.T) {
 				},
 			)
 
-			resources.Namespaces = append(resources.Namespaces, &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "envoy-gateway",
+			namespaces := []*corev1.Namespace{
+				{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "envoy-gateway",
+					},
+				}, {
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "default",
+					},
 				},
-			}, &corev1.Namespace{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "default",
-				},
-			})
+			}
+			for _, namespace := range namespaces {
+				resources.Append(namespace)
+			}
 
 			got, _ := translator.Translate(resources)
 			require.NoError(t, field.SetValue(got, "LastTransitionTime", metav1.NewTime(time.Time{})))
@@ -515,8 +527,12 @@ func TestTranslateWithExtensionKinds(t *testing.T) {
 			want := &TranslateResult{}
 			mustUnmarshal(t, output, want)
 
-			opts := cmpopts.IgnoreFields(metav1.Condition{}, "LastTransitionTime")
-			require.Empty(t, cmp.Diff(want, got, opts))
+			opts := []cmp.Option{
+				cmpopts.IgnoreFields(metav1.Condition{}, "LastTransitionTime"),
+				cmpopts.IgnoreFields(resource.Resources{}, "Cache"),
+				cmpopts.EquateEmpty(),
+			}
+			require.Empty(t, cmp.Diff(want, got, opts...))
 		})
 	}
 }
