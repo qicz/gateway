@@ -26,7 +26,7 @@ func TestResourcesCache(t *testing.T) {
 	resources := []client.Object{
 		&egv1a1.EnvoyProxy{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "EnvoyProxy",
+				Kind: KindEnvoyProxy,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "EnvoyProxy",
@@ -34,7 +34,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&gwapiv1.Gateway{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "Gateway",
+				Kind: KindGateway,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "Gateway",
@@ -42,7 +42,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&mcsapiv1a1.ServiceImport{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "ServiceImport",
+				Kind: KindServiceImport,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "ServiceImport",
@@ -50,7 +50,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&corev1.Secret{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "Secret",
+				Kind: KindSecret,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "Secret",
@@ -58,7 +58,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&corev1.ConfigMap{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "ConfigMap",
+				Kind: KindConfigMap,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "ConfigMap",
@@ -66,7 +66,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&gwapiv1b1.ReferenceGrant{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "ReferenceGrant",
+				Kind: KindReferenceGrant,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "ReferenceGrant",
@@ -74,7 +74,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&corev1.Namespace{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "Namespace",
+				Kind: KindNamespace,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "Namespace",
@@ -82,7 +82,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&discoveryv1.EndpointSlice{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "EndpointSlice",
+				Kind: KindEndpointSlice,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "endpointSlice",
@@ -90,7 +90,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&egv1a1.EnvoyPatchPolicy{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "EnvoyPatchPolicy",
+				Kind: KindEnvoyPatchPolicy,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "EnvoyPatchPolicy",
@@ -98,7 +98,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&egv1a1.ClientTrafficPolicy{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "ClientTrafficPolicy",
+				Kind: KindClientTrafficPolicy,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "ClientTrafficPolicy",
@@ -106,7 +106,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&egv1a1.BackendTrafficPolicy{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "BackendTrafficPolicy",
+				Kind: KindBackendTrafficPolicy,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "BackendTrafficPolicy",
@@ -114,7 +114,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&egv1a1.SecurityPolicy{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "SecurityPolicy",
+				Kind: KindSecurityPolicy,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "SecurityPolicy",
@@ -122,7 +122,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&gwapiv1a3.BackendTLSPolicy{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "BackendTLSPolicy",
+				Kind: KindBackendTLSPolicy,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "BackendTLSPolicy",
@@ -130,7 +130,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&egv1a1.EnvoyExtensionPolicy{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "EnvoyExtensionPolicy",
+				Kind: KindEnvoyExtensionPolicy,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "EnvoyExtensionPolicy",
@@ -138,7 +138,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&egv1a1.Backend{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "Backend",
+				Kind: KindBackend,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "Backend",
@@ -146,7 +146,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&egv1a1.HTTPRouteFilter{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "HTTPRouteFilter",
+				Kind: KindHTTPRouteFilter,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "HTTPRouteFilter",
@@ -154,7 +154,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&corev1.Service{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "Service",
+				Kind: KindService,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "Service",
@@ -162,7 +162,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&gwapiv1.HTTPRoute{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "HTTPRoute",
+				Kind: KindHTTPRoute,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "HTTPRoute",
@@ -170,7 +170,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&gwapiv1.GRPCRoute{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "GRPCRoute",
+				Kind: KindGRPCRoute,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "GRPCRoute",
@@ -178,7 +178,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&gwapiv1a2.TLSRoute{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "TLSRoute",
+				Kind: KindTLSRoute,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "TLSRoute",
@@ -186,7 +186,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&gwapiv1a2.TCPRoute{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "TCPRoute",
+				Kind: KindTCPRoute,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "TCPRoute",
@@ -194,7 +194,7 @@ func TestResourcesCache(t *testing.T) {
 		},
 		&gwapiv1a2.UDPRoute{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "UDPRoute",
+				Kind: KindUDPRoute,
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "UDPRoute",
@@ -212,31 +212,31 @@ func TestResourcesCache(t *testing.T) {
 			}
 			t.Logf("appending resource with kind %v", kind)
 			switch kind {
-			case "Namespace":
+			case KindNamespace:
 				if r.GetNamespace(name) == nil {
 					t.Logf("%s is not exist", kind)
 				}
-			case "Service":
+			case KindService:
 				if r.GetService("", name) == nil {
 					t.Logf("%s is not exist", kind)
 				}
-			case "ServiceImport":
+			case KindServiceImport:
 				if r.GetServiceImport("", name) == nil {
 					t.Logf("%s is not exist", kind)
 				}
-			case "Backend":
+			case KindBackend:
 				if r.GetBackend("", name) == nil {
 					t.Logf("%s is not exist", kind)
 				}
-			case "Secret":
+			case KindSecret:
 				if r.GetSecret("", name) == nil {
 					t.Logf("%s is not exist", kind)
 				}
-			case "ConfigMap":
+			case KindConfigMap:
 				if r.GetConfigMap("", name) == nil {
 					t.Logf("%s is not exist", kind)
 				}
-			case "EnvoyProxy":
+			case KindEnvoyProxy:
 				if r.GetEnvoyProxy("", name) == nil {
 					t.Logf("%s is not exist", kind)
 				}
@@ -245,31 +245,31 @@ func TestResourcesCache(t *testing.T) {
 				t.Logf("appends resource with kind %v", kind)
 			}
 			switch kind {
-			case "Namespace":
+			case KindNamespace:
 				if r.GetNamespace(name) != nil && r.GetNamespace(name).Name == name {
 					t.Logf("%s has aleary appended", kind)
 				}
-			case "Service":
+			case KindService:
 				if r.GetService("", name) != nil && r.GetService("", name).Name == name {
 					t.Logf("%s has aleary appended", kind)
 				}
-			case "ServiceImport":
+			case KindServiceImport:
 				if r.GetServiceImport("", name) != nil && r.GetServiceImport("", name).Name == name {
 					t.Logf("%s has aleary appended", kind)
 				}
-			case "Backend":
+			case KindBackend:
 				if r.GetBackend("", name) != nil && r.GetBackend("", name).Name == name {
 					t.Logf("%s has aleary appended", kind)
 				}
-			case "Secret":
+			case KindSecret:
 				if r.GetSecret("", name) != nil && r.GetSecret("", name).Name == name {
 					t.Logf("%s has aleary appended", kind)
 				}
-			case "ConfigMap":
+			case KindConfigMap:
 				if r.GetConfigMap("", name) != nil && r.GetConfigMap("", name).Name == name {
 					t.Logf("%s has aleary appended", kind)
 				}
-			case "EnvoyProxy":
+			case KindEnvoyProxy:
 				if r.GetEnvoyProxy("", name) != nil && r.GetEnvoyProxy("", name).Name == name {
 					t.Logf("%s has aleary appended", kind)
 				}

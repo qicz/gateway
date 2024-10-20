@@ -8,28 +8,28 @@ package resource
 // supportedCacheResourceKinds that are supported cache manager.
 // if some resources are supported remove the code slash comment.
 var supportedCacheResourceKinds = []string{
-	"EnvoyProxy",
-	"Gateway",
-	"ReferenceGrant",
-	"Namespace",
-	"ServiceImport",
-	"EndpointSlice",
-	"Secret",
-	"ConfigMap",
-	"EnvoyPatchPolicy",
-	"ClientTrafficPolicy",
-	"BackendTrafficPolicy",
-	"SecurityPolicy",
-	"BackendTLSPolicy",
-	"EnvoyExtensionPolicy",
-	"HTTPRouteFilter",
-	// "Service", // Unsupported
-	// "Backend", // Unsupported
-	// "HTTPRoute", // Unsupported
-	// "GRPCRoute", // Unsupported
-	// "TLSRoute", // Unsupported
-	// "TCPRoute", // Unsupported
-	// "UDPRoute", // Unsupported
+	KindEnvoyProxy,
+	KindGateway,
+	KindReferenceGrant,
+	KindNamespace,
+	KindServiceImport,
+	KindEndpointSlice,
+	KindSecret,
+	KindConfigMap,
+	KindEnvoyPatchPolicy,
+	KindClientTrafficPolicy,
+	KindBackendTrafficPolicy,
+	KindSecurityPolicy,
+	KindBackendTLSPolicy,
+	KindEnvoyExtensionPolicy,
+	KindHTTPRouteFilter,
+	// KindService, // Unsupported
+	// KindBackend, // Unsupported
+	// KindHTTPRoute, // Unsupported
+	// KindGRPCRoute, // Unsupported
+	// KindTLSRoute,  // Unsupported
+	// KindTCPRoute,  // Unsupported
+	// KindUDPRoute,  // Unsupported
 }
 
 // Set holds the resources with the kind.
